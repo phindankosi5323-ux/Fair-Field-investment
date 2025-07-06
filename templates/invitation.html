@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Invite & Earn - Fair Field Investment</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 250px;
+      margin: 80px auto;
+      padding: 30px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    .referral-section {
+      margin-top: 30px;
+      text-align: center;
+    }
+    .referral-link {
+      background: #f1f1f1;
+      padding: 10px;
+      border: 1px dashed #ccc;
+      margin-top: 10px;
+      word-break: break-all;
+      border-radius: 6px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .referred-users {
+      margin-top: 40px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    table th, table td {
+      padding: 12px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+    table th {
+      background-color: #007bff;
+      color: white;
+    }
+    .message {
+      text-align: center;
+      margin-top: 10px;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Invite Friends & Earn Rewards</h2>
+
+    <div class="referral-section">
+      <p>Your unique referral link:</p>
+      <div id="referralLink" class="referral-link">Loading...</div>
+      <button onclick="copyReferral()">Copy Link</button>
+      <div id="copyMessage" class="message"></div>
+    </div>
+
+    <div class="referred-users">
+      <h3>Your Referrals</h3>
+      <table id="referralTable">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Date Joined</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // Assuming the user is logged in, get the user ID from the session or token
+    const userId = 1; // Replace this with dynamic logic for session or token
+
+    // Function to copy referral link to clipboard
+    function copyReferral() {
+      const link = document.getElementById("referralLink").textContent;
+      navigator.clipboard.writeText(link).then(() => {
+        document.getElementById("copyMessage").textContent = "Referral link copied!";
+        setTimeout(() => {
+          document.getElementById("copyMessage").textContent = "";
+        }, 3000);
+      });
+    }
+
+    // On page load
+    document.addEventListener("DOMContentLoaded", function () {
+      // Fetch the referral link from the backend
+      fetch(`/api/get-referral-link?referral_code=${userId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            // Display the referral link dynamically
+            const referralURL = data.referral_link;
+            document.getElementById("referralLink").textContent = referralURL;
+          } else {
+            document.getElementById("referralLink").textContent = 'Error fetching referral link';
+          }
+        })
+        .catch(err => {
+          console.error('Error fetching referral link:', err);
+          document.getElementById("referralLink").textContent = 'Error fetching referral link';
+        });
+
+      // Fetch the list of referred users from the backend
+      fetch(`/api/get-referrals?user_id=${userId}`)
+        .then(res => res.json())
+        .then(data => {
+          const tbody = document.querySelector("#referralTable tbody");
+          data.referrals.forEach(user => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${user.name}</td>
+              <td>${user.email}</td>
+              <td>${new Date(user.joined).toLocaleDateString()}</td>
+            `;
+            tbody.appendChild(row);
+          });
+        })
+        .catch(err => {
+          console.error("Error loading referrals:", err);
+        });
+    });
+  </script>
+</body>
+</html>

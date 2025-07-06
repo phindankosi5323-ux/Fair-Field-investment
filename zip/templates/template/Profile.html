@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profile - Fair Field Investment</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 250px;
+      margin: 80px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2, h3 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin: 15px 0 5px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .message {
+      text-align: center;
+      margin-top: 15px;
+      color: #dc3545;
+      font-weight: bold;
+    }
+
+    .profile-info {
+      margin-bottom: 25px;
+    }
+
+    .profile-info p {
+      font-size: 16px;
+      margin: 10px 0;
+    }
+
+    .action-btns {
+      margin-top: 20px;
+    }
+
+    .action-btns button {
+      background-color: #28a745;
+    }
+
+    .action-btns button:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>User Profile</h2>
+
+    <!-- Profile Info Section -->
+    <div class="profile-info">
+      <p><strong>Name:</strong> <span id="userName">Loading...</span></p>
+      <p><strong>Email:</strong> <span id="userEmail">Loading...</span></p>
+      <p><strong>Balance:</strong> <span id="userBalance">Loading...</span></p>
+    </div>
+
+    <h3>Edit Profile Information</h3>
+    <form id="profileForm">
+      <label for="newEmail">New Email:</label>
+      <input type="email" id="newEmail" placeholder="Enter new email" />
+
+      <label for="newPassword">New Password:</label>
+      <input type="password" id="newPassword" placeholder="Enter new password" />
+
+      <button type="submit">Update Profile</button>
+    </form>
+
+    <div class="action-btns">
+      <button onclick="location.href='transactions.html'">View Transactions</button>
+    </div>
+
+    <div id="message" class="message"></div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const userNameEl = document.getElementById("userName");
+      const userEmailEl = document.getElementById("userEmail");
+      const userBalanceEl = document.getElementById("userBalance");
+      const messageEl = document.getElementById("message");
+
+      // Fetch user profile from backend
+      fetch("http://localhost:5000/get_profile", {
+        method: "GET",
+        credentials: "include", // if session cookie is used
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.name && data.email && data.balance !== undefined) {
+          userNameEl.textContent = data.name;
+          userEmailEl.textContent = data.email;
+          userBalanceEl.textContent = `R ${parseFloat(data.balance).toFixed(2)}`;
+        } else {
+          messageEl.textContent = "Failed to load profile data.";
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching profile:", error);
+        messageEl.textContent = "Unable to load profile data. Please try again.";
+      });
+
+      // Handle form submission
+      document.getElementById("profileForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const newEmail = document.getElementById("newEmail").value.trim();
+        const newPassword = document.getElementById("newPassword").value.trim();
+
+        if (!newEmail || !newPassword) {
+          messageEl.style.color = "#dc3545";
+          messageEl.textContent = "Please fill in both fields.";
+          return;
+        }
+
+        fetch("http://localhost:5000/update_profile", {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ email: newEmail, password: newPassword })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            messageEl.style.color = "green";
+            messageEl.textContent = "Profile updated successfully!";
+            userEmailEl.textContent = newEmail;
+            document.getElementById("profileForm").reset();
+          } else {
+            messageEl.style.color = "#dc3545";
+            messageEl.textContent = "Error updating profile.";
+          }
+        })
+        .catch(error => {
+          console.error("Update error:", error);
+          messageEl.style.color = "#dc3545";
+          messageEl.textContent = "An error occurred. Please try again.";
+        });
+      });
+    });
+  </script>
+</body>
+</html>

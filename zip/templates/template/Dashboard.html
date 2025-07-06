@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fair Field Investment - Dashboard</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      min-height: 100vh;
+      background-color: #f4f6f8;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background-color: #1a1a2e;
+      color: #fff;
+      padding: 20px 10px;
+    }
+
+    .sidebar h2 {
+      font-size: 20px;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .sidebar a {
+      display: block;
+      color: #fff;
+      padding: 12px;
+      margin: 10px 0;
+      text-decoration: none;
+      border-radius: 4px;
+      transition: background 0.3s ease;
+    }
+
+    .sidebar a:hover {
+      background-color: #16213e;
+    }
+
+    /* Main content */
+    .main {
+      flex: 1;
+      padding: 30px;
+    }
+
+    .main h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      margin-bottom: 20px;
+    }
+
+    .balance {
+      font-size: 24px;
+      font-weight: bold;
+      color: #28a745;
+    }
+
+    .welcome {
+      color: #555;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>Fair Field</h2>
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="deposit.html">💰 Deposit</a>
+    <a href="withdrawal.html">💸 Withdraw</a>
+    <a href="transactions.html">📊 Transactions</a>
+    <a href="invitation.html">🎁 Invitation</a>
+    <a href="profile.html">👤 Profile</a>
+    <a href="verification.html">✅ Verification</a>
+    <a href="login.html">🚪 Logout</a>
+  </div>
+
+  <div class="main">
+    <h1>Welcome to Your Dashboard</h1>
+    <div class="card">
+      <div class="balance" id="balance">R0.00</div>
+      <div class="welcome">Your current balance</div>
+    </div>
+    <div class="card">
+      <h3>Recent Activity</h3>
+      <ul id="activityLog">
+        <li>Loading recent transactions...</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // Example of pulling dashboard data (replace with actual backend call)
+    document.addEventListener("DOMContentLoaded", function () {
+      fetch("http://localhost:5000/dashboard-data")
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById("balance").innerText = `R${data.balance.toFixed(2)}`;
+
+          const activityLog = document.getElementById("activityLog");
+          activityLog.innerHTML = "";
+
+          if (data.activities.length === 0) {
+            activityLog.innerHTML = "<li>No recent transactions.</li>";
+          } else {
+            data.activities.forEach(item => {
+              const li = document.createElement("li");
+              li.textContent = `${item.type} of R${item.amount} on ${item.date}`;
+              activityLog.appendChild(li);
+            });
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching dashboard data:", error);
+        });
+    });
+  </script>
+</body>
+</html>

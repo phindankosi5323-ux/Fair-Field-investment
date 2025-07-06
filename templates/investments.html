@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Investments</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #333;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .tabs button {
+      padding: 10px 20px;
+      margin: 0 10px;
+      border: none;
+      background-color: #e0e0e0;
+      cursor: pointer;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+
+    .tabs button.active {
+      background-color: #28a745;
+      color: white;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #ddd;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f0f0f0;
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 20px;
+      color: #777;
+    }
+
+    #chart-container {
+      margin-top: 40px;
+      width: 100%;
+      height: 300px;
+    }
+
+    @media (max-width: 768px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      td {
+        position: relative;
+        padding-left: 50%;
+      }
+      td::before {
+        position: absolute;
+        left: 10px;
+        top: 12px;
+        font-weight: bold;
+        color: #555;
+        content: attr(data-label);
+      }
+      th {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>My Investments</h1>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="active">Active Investments</button>
+      <button class="tab-btn" data-tab="expired">Expired Investments</button>
+    </div>
+
+    <div id="investmentTableContainer">
+      <div id="active" class="investment-table"></div>
+      <div id="expired" class="investment-table" style="display:none;"></div>
+    </div>
+
+    <!-- Chart Container -->
+    <div id="chart-container">
+      <canvas id="earningsChart"></canvas>
+    </div>
+  </div>
+
+  <script>
+    const tabs = document.querySelectorAll('.tab-btn');
+    const tables = document.querySelectorAll('.investment-table');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tables.forEach(table => table.style.display = 'none');
+
+        tab.classList.add('active');
+        const selected = tab.getAttribute('data-tab');
+        document.getElementById(selected).style.display = 'block';
+      });
+    });
+
+    // Render Investment Table
+    function renderTable(containerId, data) {
+      const container = document.getElementById(containerId);
+      if (data.length === 0) {
+        container.innerHTML = `<div class="no-data">No ${containerId} investments found.</div>`;
+        return;
+      }
+
+      const rows = data.map(inv => `
+        <tr>
+          <td data-label="Amount">R${inv.amount.toFixed(2)}</td>
+          <td data-label="Rate">${inv.daily_rate}%</td>
+          <td data-label="Duration">${inv.duration} days</td>
+          <td data-label="Start">${inv.start_date}</td>
+          <td data-label="Status">${inv.status}</td>
+        </tr>
+      `).join("");
+
+      container.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Amount</th>
+              <th>Daily Rate</th>
+              <th>Duration</th>
+              <th>Start Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    // Fetch Investment Data
+    fetch("/api/my-investments")
+      .then(res => res.json())
+      .then(data => {
+        const active = data.filter(i => i.status === "active");
+        const expired = data.filter(i => i.status === "expired");
+        renderTable("active", active);
+        renderTable("expired", expired);
+        updateEarningsGraph(data);  // Update the earnings graph
+      })
+      .catch(err => {
+        console.error("Error fetching investments:", err);
+        document.getElementById("active").innerHTML = `<div class="no-data">Error loading data.</div>`;
+        document.getElementById("expired").innerHTML = `<div class="no-data">Error loading data.</div>`;
+      });
+
+    // Function to calculate total earned interest
+    function calculateTotalEarnings(investments) {
+      return investments.reduce((total, inv) => {
+        const earnings = inv.amount * (inv.daily_rate / 100) * inv.duration;
+        return total + earnings;
+      }, 0);
+    }
+
+    // Chart.js Configuration
+    const ctx = document.getElementById('earningsChart').getContext('2d');
+    const earningsChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], // Month labels
+        datasets: [{
+          label: 'Total Earned Interest',
+          data: [], // Dynamic data will be filled here
+          borderColor: 'rgba(75, 192, 192, 1)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          fill: true,
+          tension: 0.1
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+
+    // Update the graph with total earnings data
+    function updateEarningsGraph(investments) {
+      const totalEarnings = calculateTotalEarnings(investments);
+      earningsChart.data.datasets[0].data.push(totalEarnings);  // Push the total earnings value
+      earningsChart.update();  // Update the chart
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Dashboard - Fair Field Investment</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+      background: #f9f9f9;
+    }
+    nav {
+      width: 240px;
+      background-color: #222;
+      color: white;
+      display: flex;
+      flex-direction: column;
+    }
+    nav h2 {
+      padding: 1rem;
+      margin: 0;
+      border-bottom: 1px solid #444;
+      font-weight: normal;
+      font-size: 1.3rem;
+      text-align: center;
+      user-select: none;
+    }
+    nav button {
+      background: none;
+      border: none;
+      color: white;
+      padding: 1rem;
+      text-align: left;
+      width: 100%;
+      cursor: pointer;
+      font-size: 1rem;
+      border-bottom: 1px solid #444;
+      transition: background-color 0.3s;
+    }
+    nav button:hover, nav button.active {
+      background-color: #007bff;
+      outline: none;
+    }
+
+    main {
+      flex-grow: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    h1 {
+      margin-top: 0;
+      color: #333;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      background: white;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      text-align: left;
+      vertical-align: middle;
+    }
+    th {
+      background-color: #007bff;
+      color: white;
+      user-select: none;
+    }
+    tr:nth-child(even) {
+      background-color: #f7f7f7;
+    }
+    button.action-btn {
+      padding: 6px 12px;
+      margin-right: 6px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      color: white;
+      user-select: none;
+      transition: background-color 0.3s;
+    }
+    button.approve-btn {
+      background-color: #28a745;
+    }
+    button.approve-btn:hover {
+      background-color: #218838;
+    }
+    button.reject {
+      background-color: #dc3545;
+    }
+    button.reject:hover {
+      background-color: #c82333;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      body {
+        flex-direction: column;
+      }
+      nav {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+      }
+      nav button {
+        flex-grow: 1;
+        text-align: center;
+        border-bottom: none;
+        border-right: 1px solid #444;
+      }
+      nav button:last-child {
+        border-right: none;
+      }
+      main {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <h2>Administrator Panel</h2>
+  <button class="active" data-tab="fica">KYC Verifications</button>
+  <button data-tab="withdrawals">Withdrawal Approvals</button>
+  <button data-tab="deposits">Deposit Approvals</button>
+</nav>
+
+<main>
+  <section id="fica" class="tab-content" style="display: block;">
+    <h1>KYC Verifications</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>User ID</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="fica-approvals">
+        <tr><td colspan="5" style="text-align:center; font-style: italic;">Loading...</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="withdrawals" class="tab-content" style="display: none;">
+    <h1>Withdrawal Approvals</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Txn ID</th>
+          <th>User</th>
+          <th>Amount</th>
+          <th>Requested On</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="withdrawals-approvals">
+        <tr><td colspan="6" style="text-align:center; font-style: italic;">Loading...</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="deposits" class="tab-content" style="display: none;">
+    <h1>Deposit Approvals</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>Txn ID</th>
+          <th>User</th>
+          <th>Amount</th>
+          <th>Deposited On</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="deposits-approvals">
+        <tr><td colspan="6" style="text-align:center; font-style: italic;">Loading...</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+
+<script>
+  // Tab navigation logic
+  const navButtons = document.querySelectorAll('nav button');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  navButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      navButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const target = btn.dataset.tab;
+      tabContents.forEach(tc => {
+        tc.style.display = tc.id === target ? 'block' : 'none';
+      });
+
+      // Fetch data for the selected tab
+      fetchData(target);
+    });
+  });
+
+  // Render table rows helper
+  function renderTableRows(containerId, items, type) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+
+    if (!items || items.length === 0) {
+      container.innerHTML = `<tr><td colspan="6" style="text-align:center; font-style: italic;">No pending items.</td></tr>`;
+      return;
+    }
+
+    items.forEach(item => {
+      const tr = document.createElement('tr');
+      if (type === 'fica') {
+        tr.innerHTML = `
+          <td>${item.id}</td>
+          <td>${item.username}</td>
+          <td>${item.email}</td>
+          <td>${item.verification_status}</td>
+          <td>
+            <button class="action-btn approve-btn" data-type="fica" data-id="${item.id}">Approve</button>
+            <button class="action-btn reject" data-type="fica" data-id="${item.id}">Reject</button>
+          </td>
+        `;
+      } else if (type === 'withdrawals') {
+        tr.innerHTML = `
+          <td>${item.id}</td>
+          <td>${item.user}</td>
+          <td>R${item.amount.toFixed(2)}</td>
+          <td>${new Date(item.timestamp).toLocaleString()}</td>
+          <td>${item.status}</td>
+          <td>
+            <button class="action-btn approve-btn" data-type="withdrawals" data-id="${item.id}">Approve</button>
+            <button class="action-btn reject" data-type="withdrawals" data-id="${item.id}">Reject</button>
+          </td>
+        `;
+      } else if (type === 'deposits') {
+        tr.innerHTML = `
+          <td>${item.id}</td>
+          <td>${item.user}</td>
+          <td>R${item.amount.toFixed(2)}</td>
+          <td>${new Date(item.timestamp).toLocaleString()}</td>
+          <td>${item.status}</td>
+          <td>
+            <button class="action-btn approve-btn" data-type="deposits" data-id="${item.id}">Approve</button>
+            <button class="action-btn reject" data-type="deposits" data-id="${item.id}">Reject</button>
+          </td>
+        `;
+      }
+      container.appendChild(tr);
+    });
+  }
+
+  // Fetch data from backend API
+  async function fetchData(type) {
+    const containerId = {
+      'fica': 'fica-approvals',
+      'withdrawals': 'withdrawals-approvals',
+      'deposits': 'deposits-approvals'
+    }[type];
+
+    try {
+      const res = await fetch(`/admin/api/${type}`);
+      if (!res.ok) throw new Error(`Failed to fetch ${type}`);
+      const data = await res.json();
+      renderTableRows(containerId, data, type);
+    } catch (err) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = `<tr><td colspan="6" style="color:red; text-align:center;">Error loading data</td></tr>`;
+      console.error(err);
+    }
+  }
+
+  // Approve/Reject action handler
+  async function sendAction(type, id, action) {
+    try {
+      const res = await fetch(`/admin/api/${type}/${id}/${action}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (!res.ok) throw new Error(`Failed to ${action} ${type} ${id}`);
+      const data = await res.json();
+      alert(data.message);
+      fetchData(type); // Refresh data after action
+    } catch (err) {
+      alert(err.message || 'Error performing action');
+      console.error(err);
+    }
+  }
+
+  // Delegate click for approve/reject buttons
+  document.body.addEventListener('click', e => {
+    if (e.target.matches('.approve-btn, .reject')) {
+      const btn = e.target;
+      const type = btn.dataset.type;
+      const id = btn.dataset.id;
+      const action = btn.classList.contains('approve-btn') ? 'approve' : 'reject';
+      if (confirm(`Are you sure you want to ${action} this ${type}?`)) {
+        sendAction(type, id, action);
+      }
+    }
+  });
+
+  // Initial load: fetch FICA data by default
+  fetchData('fica');
+</script>
+
+</body>
+</html>

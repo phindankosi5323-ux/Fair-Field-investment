@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Investment Levels - Fair Field Investment</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(120deg, #007bff, #00c6ff);
+      color: #3577be;
+  }
+
+  .container {
+    width: fit-content;
+    max-width: 95%;
+    margin: auto;
+    background: #88b4e3;
+    padding: 20px 15px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    overflow-x: auto;
+  }
+
+  .plan-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+    min-width: 900px;
+  }
+
+  .plan-table th,
+  .plan-table td {
+    padding: 12px 16px;
+    text-align: center;
+    border: 1px solid blue;
+  }
+
+  .plan-table th {
+    background-color: #007bff;
+    color: white;
+  }
+
+  .plan-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+  .highlight {
+    background-color: #eaf9f0 !important;
+    font-weight: bold;
+  }
+
+  .start-button {
+    display: block;
+    margin: 30px auto 10px;
+    padding: 12px 35px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .start-button:hover {
+    background-color: #218838;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 13px;
+    color: #777;
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      width: 100%;
+      padding: 15px;
+      overflow-x: auto;
+    }
+
+    .plan-table {
+      font-size: 13px;
+      min-width: 600px;
+    }
+
+    .start-button {
+      width: 100%;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Investment Levels</h1>
+    <p>Choose a plan that fits your budget. Click "View Details" to learn more about each plan.</p>
+
+    <table class="plan-table">
+      <thead>
+        <tr>
+          <th>Level</th>
+          <th>Title</th>
+          <th>Amount</th>
+          <th>Daily Return<span class="tooltip" data-tooltip="Percentage earned daily based on invested amount.">%</span></th>
+          <th>Days</th>
+          <th>Total Return</th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>Beginner investor Membership</td>
+          <td>R200</td>
+          <td>0.35%</td>
+          <td>31</td>
+          <td>R221.70</td>
+          <td><button class="modal-btn" onclick="openModal(1)">View Details</button></td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Cooper investor Membership</td>
+          <td>R500</td>
+          <td>0.25%</td>
+          <td>31</td>
+          <td>R538.75</td>
+          <td><button class="modal-btn" onclick="openModal(2)">View Details</button></td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>Silver investor Membership</td>
+          <td>R1,000</td>
+          <td>0.25%</td>
+          <td>62</td>
+          <td>R1,155.00</td>
+          <td><button class="modal-btn" onclick="openModal(3)">View Details</button></td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Gold investor Membership</td>
+          <td>R2,000</td>
+          <td>0.25%</td>
+          <td>62</td>
+          <td>R2,310.00</td>
+          <td><button class="modal-btn" onclick="openModal(4)">View Details</button></td>
+        </tr>
+        <tr class="highlight">
+          <td>5</td>
+          <td>Platinum investor Membership</td>
+          <td>R5,000</td>
+          <td>0.25%</td>
+          <td>62</td>
+          <td>R5,775.00</td>
+          <td><button class="modal-btn" onclick="openModal(5)">View Details</button></td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>Diamond investor Membership</td>
+          <td>R20,000</td>
+          <td>0.25%</td>
+          <td>90</td>
+          <td>R24,500.00</td>
+          <td><button class="modal-btn" onclick="openModal(6)">View Details</button></td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td>Elite Partner</td>
+          <td>R50,000</td>
+          <td>0.28%</td>
+          <td>120</td>
+          <td>R66,800.00</td>
+          <td><button class="modal-btn" onclick="openModal(7)">View Details</button></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button class="start-button" onclick="window.location.href='/register'">Get Started</button>
+
+    <footer>
+      &copy; 2025 Fair Field Investment. All rights reserved.
+    </footer>
+  </div>
+
+  <!-- Modals -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2 id="modalTitle">Plan Title</h2>
+      <p id="modalDescription">More info about the plan will go here.</p>
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById("modal");
+    const title = document.getElementById("modalTitle");
+    const desc = document.getElementById("modalDescription");
+
+    const plans = {
+      1: { title: "Beginner", desc: "Great for starters. Low risk and stable returns over a month." },
+      2: { title: "Cooper Medal", desc: "Affordable plan for new investors with daily returns and 1-month duration." },
+      3: { title: "Silver Medal", desc: "Build confidence with this solid 2-month investment plan." },
+      4: { title: "Gold Medal", desc: "More returns with moderate commitment. Ideal for growing your portfolio." },
+      5: { title: "Platinum Medal", desc: "Perfect for serious investors looking for bigger daily returns." },
+      6: { title: "Diamond Member", desc: "Advanced investment level with premium ROI over 3 months." },
+      7: { title: "Elite Partner", desc: "Top-tier plan for elite investors with maximum earning potential." }
+    };
+
+    function openModal(id) {
+      title.textContent = plans[id].title;
+      desc.textContent = plans[id].desc;
+      modal.style.display = "block";
+    }
+
+    function closeModal() {
+      modal.style.display = "none";
+    }
+
+    window.onclick = function(e) {
+      if (e.target === modal) {
+        closeModal();
+      }
+    }
+  </script>
+</body>
+</html>

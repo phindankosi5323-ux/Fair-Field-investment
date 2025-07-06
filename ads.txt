@@ -1,0 +1,10 @@
+# ads.txt for Fair Field Investment
+
+# Authorized sellers for Fair Field Investment's advertising inventory
+google.com, pub-xxxxxxxxxxxxxxxx, DIRECT, f08c47fec0942fa0
+
+# Authorized reseller for programmatic ads
+rubiconproject.com, 12345, RESELLER, f08c47fec0942fa0
+
+# Another authorized seller (example)
+advertiser.com, 67890, DIRECT, f08c47fec0942fa0

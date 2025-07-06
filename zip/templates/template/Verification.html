@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FICA Verification - Fair Field Investment</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 80px auto;
+      background: white;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #007bff;
+      margin-bottom: 20px;
+    }
+
+    .instructions {
+      background: #e9f4ff;
+      padding: 15px;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin: 15px 0 5px;
+      font-weight: bold;
+    }
+
+    input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .info {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 13px;
+      color: #777;
+    }
+
+    .status-message {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        margin: 30px 15px;
+        padding: 25px;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>FICA Verification</h2>
+
+    <div class="instructions">
+      <p><strong>Why do we need this?</strong> To comply with South African financial laws, we require your identity and address verification before you can deposit or withdraw funds.</p>
+      <ul>
+        <li>📄 Upload a **clear copy of your ID** or passport.</li>
+        <li>🏠 Upload a **recent proof of address** (utility bill, bank statement, etc.).</li>
+        <li>✅ Your documents will be reviewed within 24 hours.</li>
+      </ul>
+    </div>
+
+    <form id="verificationForm" enctype="multipart/form-data">
+      <label for="idDocument">Upload ID Document:</label>
+      <input type="file" id="idDocument" name="idDocument" accept=".jpg,.jpeg,.png,.pdf" required />
+
+      <label for="proofAddress">Upload Proof of Address:</label>
+      <input type="file" id="proofAddress" name="proofAddress" accept=".jpg,.jpeg,.png,.pdf" required />
+
+      <button type="submit">Submit Documents</button>
+    </form>
+
+    <div class="status-message" id="statusMsg"></div>
+
+    <div class="info">
+      Note: You'll be notified via email once your documents are approved.
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("verificationForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const idDoc = document.getElementById("idDocument").files[0];
+      const proof = document.getElementById("proofAddress").files[0];
+      const statusMsg = document.getElementById("statusMsg");
+
+      if (!idDoc || !proof) {
+        statusMsg.textContent = "Please select both files before submitting.";
+        statusMsg.style.color = "red";
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("idDocument", idDoc);
+      formData.append("proofAddress", proof);
+
+      statusMsg.style.color = "black";
+      statusMsg.textContent = "Uploading your documents, please wait...";
+
+      fetch("http://localhost:5000/verify", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          statusMsg.style.color = "green";
+          statusMsg.textContent = "Documents submitted successfully. Await approval.";
+        } else {
+          statusMsg.style.color = "red";
+          statusMsg.textContent = data.message || "Submission failed.";
+        }
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        statusMsg.style.color = "red";
+        statusMsg.textContent = "An error occurred. Please try again.";
+      });
+    });
+  </script>
+</body>
+</html>

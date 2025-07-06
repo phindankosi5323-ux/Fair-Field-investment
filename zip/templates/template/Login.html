@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fair Field Investment - Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8f9fa;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      width: 100%;
+      max-width: 250px;
+      margin: 100px auto;
+      padding: 30px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    .link {
+      text-align: center;
+      margin-top: 10px;
+    }
+    .link a {
+      text-decoration: none;
+      color: #007bff;
+    }
+    .link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Login</h2>
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Username" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <button type="submit">Login</button>
+    </form>
+    <div class="link">
+      <p>Don't have an account? <a href="register.html">Register</a></p>
+      <p><a href="forget_password.html">Forgot password?</a></p>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      fetch("http://localhost:5000/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ username, password })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          const ficaStatus = data.fica_status;
+
+          if (ficaStatus === "unverified") {
+            alert("FICA not submitted. You must verify your identity first.");
+            window.location.href = "verify_fica.html"; // FICA upload page
+          } else if (ficaStatus === "pending") {
+            alert("Your FICA documents are submitted and currently under review. Please wait for approval.");
+            // Optionally keep the user on login or redirect to a status page
+          } else if (ficaStatus === "approved") {
+            alert("Login successful! Redirecting to your dashboard.");
+            window.location.href = "dashboard.html";
+          } else {
+            alert("Unknown FICA status. Please contact support.");
+          }
+        } else {
+          alert("Invalid credentials. Please try again.");
+        }
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        alert("Something went wrong. Please try again later.");
+      });
+    });
+  </script>
+</body>
+</html>

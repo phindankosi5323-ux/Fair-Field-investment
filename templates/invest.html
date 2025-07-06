@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Investment Plans | Fair Field</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 10px;
+      color: #007bff;
+    }
+
+    #balance {
+      text-align: center;
+      font-size: 18px;
+      margin-bottom: 30px;
+      color: #333;
+    }
+
+    .plans {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+
+    .plan {
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      transition: box-shadow 0.3s ease;
+      background-color: #fafafa;
+    }
+
+    .plan:hover {
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+
+    .plan-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #007bff;
+    }
+
+    .plan-amount,
+    .plan-return {
+      font-size: 15px;
+      margin: 5px 0;
+    }
+
+    .btn {
+      background: #007bff;
+      color: white;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .btn:hover {
+      background: #0056b3;
+    }
+
+    @media (max-width: 600px) {
+      .plan-title {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Select an Investment Plan</h2>
+    <div id="balance">Loading balance...</div>
+    <div class="plans" id="plansContainer">
+      <!-- Plans will be added here dynamically -->
+    </div>
+  </div>
+
+ <script>
+let currentBalance = 0;
+
+// List of investment plans
+const investmentPlans = [
+  { level: 1, title: "Beginner", amount: 200, daily: 0.35, days: 31 },
+  { level: 2, title: "Cooper Member", amount: 500, daily: 0.25, days: 31 },
+  { level: 3, title: "Silver Member", amount: 1000, daily: 0.25, days: 62 },
+  { level: 4, title: "Gold Member", amount: 2000, daily: 0.25, days: 62 },
+  { level: 5, title: "Platinum Member", amount: 5000, daily: 0.25, days: 62 },
+  { level: 6, title: "Diamond Member", amount: 20000, daily: 0.25, days: 90 },
+  { level: 7, title: "Elite Member", amount: 50000, daily: 0.28, days: 120 }
+];
+
+// Render investment plans
+function renderPlans() {
+  const container = document.getElementById("plansContainer");
+  container.innerHTML = ""; // clear previous
+  investmentPlans.forEach(plan => {
+    const totalReturn = (plan.amount * (1 + (plan.daily / 100) * plan.days)).toFixed(2);
+    const div = document.createElement("div");
+    div.className = "plan";
+    div.innerHTML = `
+      <div class="plan-title">${plan.title}</div>
+      <div class="plan-amount">Amount: R${plan.amount}</div>
+      <div class="plan-return">Daily ROI: ${plan.daily}%</div>
+      <div class="plan-return">Duration: ${plan.days} days</div>
+      <div class="plan-return">Expected Return: R${totalReturn}</div>
+      <button class="btn" onclick="selectPlan(${plan.amount}, ${plan.days}, ${plan.daily})">Invest Now</button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// Load current balance from backend
+function loadBalance() {
+  fetch('/dashboard-data')
+    .then(res => res.json())
+    .then(data => {
+      currentBalance = parseFloat(data.balance);
+      const balDiv = document.getElementById('balance');
+      balDiv.textContent = `Available Balance: R${currentBalance.toFixed(2)}`;
+    })
+    .catch(err => {
+      console.error('Failed to load balance', err);
+      document.getElementById('balance').textContent = 'Error loading balance.';
+    });
+}
+
+// When "Invest Now" is clicked
+function selectPlan(amount, days, rate) {
+  if (amount > currentBalance) {
+    alert("❌ Insufficient funds. Please  make a deposit and proceed.");
+    return;
+  }
+
+  fetch("/api/invest", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ amount, days, rate })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      alert(data.message || "✅ Investmented successful!");
+      loadBalance();
+    } else {
+      alert(data.message || "❌ Investment failed.");
+    }
+  })
+  .catch(err => {
+    console.error("Investment error:", err);
+    alert("❌ Failed to submit investment. Try again.");
+  });
+}
+
+// On page load
+document.addEventListener("DOMContentLoaded", () => {
+  loadBalance();
+  renderPlans();
+});
+</script>
+</body>
+</html>

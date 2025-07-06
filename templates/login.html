@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fair Field Investment - Login</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #007bff, #00c6ff);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      width: 100%;
+      max-width: 250px;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 0.5s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    h1, h2 {
+      text-align: center;
+      color: #007bff;
+      margin-bottom: 20px;
+    }
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+    input:focus {
+      border-color: #007bff;
+      outline: none;
+      box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    .link {
+      text-align: center;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+    .link a {
+      color: #007bff;
+      text-decoration: none;
+    }
+    .link a:hover {
+      text-decoration: underline;
+    }
+    .alert {
+      margin-top: 15px;
+      padding: 12px 15px;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #fff;
+      font-weight: bold;
+      display: none;
+      text-align: center;
+    }
+    .alert.success { background-color: #28a745; }
+    .alert.warning { background-color: #ffc107; color: #333; }
+    .alert.error   { background-color: #dc3545; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Fair Field Investment™️</h1>
+    <h2>Investor login</h2>
+    <form id="loginForm">
+      <input type="text" id="username" placeholder="Username" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <button type="submit">Login</button>
+      <div id="statusMessage" class="alert"></div>
+    </form>
+    <div class="link">
+      <p>Don't have an account? <a href="/register">Register</a></p>
+      <p><a href="/forgot-password">Forgot password?</a></p>
+    </div>
+  </div>
+
+  <script>
+    const loginForm = document.getElementById("loginForm");
+    const statusMsg = document.getElementById("statusMessage");
+
+    loginForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      fetch("/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ username, password })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          const ficaStatus = data.fica_status?.toLowerCase();
+
+          if (ficaStatus === "unverified") {
+            showAlert("Your account is not verified. Please complete KYC verification.", "warning");
+            setTimeout(() => {
+              window.location.href = "/verification";
+            }, 2000);
+          } else if (ficaStatus === "pending") {
+            showAlert("Your FICA verification is pending. Please wait for admin approval.", "warning");
+          } else if (ficaStatus === "approved") {
+            showAlert("Login successful! Redirecting to dashboard...", "success");
+            setTimeout(() => {
+              window.location.href = "/dashboard";
+            }, 2000);
+          } else {
+            showAlert("Unknown FICA status. Please contact support.", "error");
+          }
+        } else {
+          showAlert("Invalid username or password.", "error");
+        }
+      })
+      .catch(error => {
+        console.error("Login error:", error);
+        showAlert("Server error. Try again later.", "error");
+      });
+    });
+
+    function showAlert(message, type) {
+      statusMsg.className = `alert ${type}`;
+      statusMsg.textContent = message;
+      statusMsg.style.display = "block";
+    }
+  </script>
+</body>
+</html>

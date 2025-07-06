@@ -1,0 +1,103 @@
+<!-- templates/invitation_maintenance.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Invitation Page Maintenance</title>
+  <meta http-equiv="refresh" content="7;url=/dashboard">
+  <style>
+    body {
+      background: linear-gradient(to right, #eef2f3, #8e9eab);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background-color: #ffffff;
+      padding: 40px 60px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      text-align: center;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    h1 {
+      color: #2c3e50;
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+
+    p {
+      color: #555;
+      font-size: 16px;
+    }
+
+    small {
+      color: #888;
+      margin-top: 25px;
+      display: block;
+    }
+
+    .progress-bar {
+      margin-top: 30px;
+      width: 100%;
+      height: 10px;
+      background-color: #e0e0e0;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+      animation: progressAnimation 5s linear forwards;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: scale(0.95);}
+      to {opacity: 1; transform: scale(1);}
+    }
+
+    @keyframes progressAnimation {
+      0% {width: 0%;}
+      100% {width: 100%;}
+    }
+
+    .btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 25px;
+      font-size: 14px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚧 Invitation Page Under Maintenance</h1>
+    <p>We're upgrading our referral system to serve you better.</p>
+
+    <div class="progress-bar">
+      <div class="progress"></div>
+    </div>
+
+    <small>You will be redirected to your dashboard in 10 seconds...</small>
+
+    <a href="/dashboard" class="btn">Go to Dashboard Now</a>
+  </div>
+</body>
+</html>

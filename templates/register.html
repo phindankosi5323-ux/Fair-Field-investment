@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register - Fair Field Investment</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #007bff, #00c6ff);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: #fff;
+      max-width: 450px;
+      width: 100%;
+      margin: 20px;
+      padding: 35px 25px;
+      border-radius: 15px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+      animation: fadeSlide 0.6s ease-in-out;
+    }
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    h2 {
+      text-align: center;
+      color: #007bff;
+      margin-bottom: 25px;
+    }
+    label {
+      font-weight: 500;
+      font-size: 14px;
+      display: block;
+      margin-top: 10px;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin-top: 5px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: all 0.3s ease;
+    }
+    input:focus, select:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 6px rgba(0,123,255,0.4);
+      outline: none;
+    }
+    button {
+      width: 100%;
+      padding: 13px;
+      background-color: #007bff;
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    .link {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 14px;
+    }
+    .link a {
+      color: #007bff;
+      text-decoration: none;
+    }
+    .link a:hover {
+      text-decoration: underline;
+    }
+    .error-message {
+      color: #dc3545;
+      font-size: 13px;
+      margin-top: -10px;
+      margin-bottom: 10px;
+      display: none;
+    }
+    @media (max-width: 480px) {
+      .container {
+        padding: 25px 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Create Your Account</h2>
+    <form id="registerForm" autocomplete="on">
+      <label for="fullName">Full Name</label>
+      <input type="text" id="fullName" required />
+      <div id="fullNameError" class="error-message"></div>
+
+      <label for="username">Username</label>
+      <input type="text" id="username" required />
+      <div id="usernameError" class="error-message"></div>
+
+      <label for="email">Email Address</label>
+      <input type="email" id="email" required />
+      <div id="emailError" class="error-message"></div>
+
+      <label for="password">Password</label>
+      <input type="password" id="password" required minlength="8" />
+      <div id="passwordError" class="error-message"></div>
+
+      <label for="phone">Phone Number</label>
+      <input type="tel" id="phone" required />
+      <div id="phoneError" class="error-message"></div>
+
+      <label for="idNumber">ID Number</label>
+      <input type="text" id="idNumber" required />
+      <div id="idNumberError" class="error-message"></div>
+
+      <label for="gender">Gender</label>
+      <select id="gender" required>
+        <option value="">Select Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select>
+      <div id="genderError" class="error-message"></div>
+
+      <label for="dob">Date of Birth</label>
+      <input type="date" id="dob" required />
+      <div id="dobError" class="error-message"></div>
+
+      <label for="address">Address</label>
+      <input type="text" id="address" required />
+      <div id="addressError" class="error-message"></div>
+
+      <label for="country">Country</label>
+      <input type="text" id="country" required />
+      <div id="countryError" class="error-message"></div>
+
+      <button type="submit" id="registerBtn">Register</button>
+    </form>
+    <div class="link">
+      Already have an account? <a href="/login">Login</a>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const form = document.getElementById('registerForm');
+      const registerBtn = document.getElementById('registerBtn');
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        registerBtn.disabled = true;
+        registerBtn.textContent = 'Processing...';
+
+        // Clear previous errors
+        document.querySelectorAll('.error-message').forEach(el => {
+          el.textContent = '';
+          el.style.display = 'none';
+        });
+
+        const userData = {
+          fullName: document.getElementById('fullName').value.trim(),
+          username: document.getElementById('username').value.trim(),
+          email: document.getElementById('email').value.trim(),
+          password: document.getElementById('password').value,
+          phone: document.getElementById('phone').value.trim(),
+          idNumber: document.getElementById('idNumber').value.trim(),
+          gender: document.getElementById('gender').value,
+          dob: document.getElementById('dob').value,
+          address: document.getElementById('address').value.trim(),
+          country: document.getElementById('country').value.trim()
+        };
+
+        try {
+          const res = await fetch('/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(userData)
+          });
+
+          const data = await res.json();
+
+          if (!res.ok && data.errors) {
+            Object.entries(data.errors).forEach(([field, message]) => {
+              const err = document.getElementById(`${field}Error`);
+              if (err) {
+                err.textContent = message;
+                err.style.display = 'block';
+              }
+            });
+          } else if (data.success) {
+            showAlert('Registration successful! Redirecting...', 'success');
+            setTimeout(() => window.location.href = '/verification', 2000);
+          } else {
+            showAlert(data.message || 'Registration failed', 'error');
+          }
+        } catch (err) {
+          console.error(err);
+          showAlert('Network error. Please try again.', 'error');
+        } finally {
+          registerBtn.disabled = false;
+          registerBtn.textContent = 'Register';
+        }
+      });
+
+      document.getElementById('password').addEventListener('input', function () {
+        const msg = document.getElementById('passwordError');
+        if (this.value.length > 0 && this.value.length < 8) {
+          msg.textContent = 'Password must be at least 8 characters';
+          msg.style.display = 'block';
+        } else {
+          msg.style.display = 'none';
+        }
+      });
+
+      document.getElementById('email').addEventListener('blur', function () {
+        const msg = document.getElementById('emailError');
+        if (!this.value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+          msg.textContent = 'Enter a valid email';
+          msg.style.display = 'block';
+        } else {
+          msg.style.display = 'none';
+        }
+      });
+    });
+
+    function showAlert(message, type) {
+      const alert = document.createElement('div');
+      alert.textContent = message;
+      alert.style.position = 'fixed';
+      alert.style.top = '20px';
+      alert.style.left = '50%';
+      alert.style.transform = 'translateX(-50%)';
+      alert.style.padding = '14px 24px';
+      alert.style.borderRadius = '6px';
+      alert.style.color = '#fff';
+      alert.style.fontWeight = '500';
+      alert.style.zIndex = '9999';
+      alert.style.backgroundColor = type === 'success' ? '#28a745' : '#dc3545';
+      alert.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+      alert.style.animation = 'fadeIn 0.3s ease-in-out';
+
+      document.body.appendChild(alert);
+
+      setTimeout(() => {
+        alert.style.animation = 'fadeOut 0.3s ease-in-out';
+        setTimeout(() => document.body.removeChild(alert), 300);
+      }, 3000);
+    }
+
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fadeIn {
+        from { opacity: 0; top: 0; }
+        to { opacity: 1; top: 20px; }
+      }
+      @keyframes fadeOut {
+        from { opacity: 1; top: 20px; }
+        to { opacity: 0; top: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+# Robots.txt for Fair Field Investment platform
+
+# Allow all user agents (search engine bots)
+User-agent: *
+
+# Disallow sensitive or private pages
+Disallow: /login
+Disallow: /register
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /user-profile
+Disallow: /forget-password
+Disallow: /verification
+
+# Allow the rest of the site (like public pages)
+Allow: /terms-conditions
+Allow: /investment-levels
+Allow: /about
+Allow: /contact
+
+# Specify a sitemap location (Optional)
+Sitemap: https://www.yoursite.com/sitemap.xml

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Withdraw - Fair Field Investment</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      width: 100%;
+      max-width: 250px;
+      margin: 80px auto;
+      padding: 30px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+    label {
+      display: block;
+      margin: 15px 0 5px;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .section {
+      display: none;
+    }
+    .message {
+      text-align: center;
+      color: #dc3545;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Withdraw Funds</h2>
+
+    <label for="method">Choose Withdrawal Method:</label>
+    <select id="method">
+      <option value="">-- Select Method --</option>
+      <option value="crypto">Crypto</option>
+      <option value="bank">Bank Transfer</option>
+      <option value="mobile">Mobile Money</option>
+    </select>
+
+    <!-- 🔐 CRYPTO SECTION -->
+    <div id="cryptoSection" class="section">
+      <label for="cryptoAddress">Crypto Wallet Address</label>
+      <input type="text" id="cryptoAddress" placeholder="e.g. 0xABC123..." />
+      <label for="cryptoAmount">Amount (ZAR)</label>
+      <input type="number" id="cryptoAmount" min="1" />
+      <button onclick="submitWithdrawal('crypto')">Withdraw with Crypto</button>
+    </div>
+
+    <!-- 🏦 BANK SECTION -->
+    <div id="bankSection" class="section">
+      <label for="bankDetails">Bank Account Details</label>
+      <input type="text" id="bankDetails" placeholder="e.g. Acc No, Bank Name" />
+      <label for="bankAmount">Amount (ZAR)</label>
+      <input type="number" id="bankAmount" min="1" />
+      <button onclick="submitWithdrawal('bank')">Withdraw to Bank</button>
+    </div>
+
+    <!-- 📱 MOBILE SECTION -->
+    <div id="mobileSection" class="section">
+      <label for="mobileNumber">Mobile Money Number</label>
+      <input type="text" id="mobileNumber" placeholder="e.g. +27 61 234 5678" />
+      <label for="mobileAmount">Amount (ZAR)</label>
+      <input type="number" id="mobileAmount" min="1" />
+      <button onclick="submitWithdrawal('mobile')">Withdraw via Mobile Money</button>
+    </div>
+
+    <div id="message" class="message"></div>
+  </div>
+
+  <script>
+    const methodSelect = document.getElementById("method");
+    const message = document.getElementById("message");
+
+    const sections = {
+      crypto: document.getElementById("cryptoSection"),
+      bank: document.getElementById("bankSection"),
+      mobile: document.getElementById("mobileSection")
+    };
+
+    methodSelect.addEventListener("change", () => {
+      message.textContent = "";
+      Object.values(sections).forEach(sec => sec.style.display = "none");
+      const selected = methodSelect.value;
+      if (sections[selected]) {
+        sections[selected].style.display = "block";
+      }
+    });
+
+    function submitWithdrawal(method) {
+      let amount, destination;
+
+      if (method === "crypto") {
+        destination = document.getElementById("cryptoAddress").value;
+        amount = parseFloat(document.getElementById("cryptoAmount").value);
+      } else if (method === "bank") {
+        destination = document.getElementById("bankDetails").value;
+        amount = parseFloat(document.getElementById("bankAmount").value);
+      } else if (method === "mobile") {
+        destination = document.getElementById("mobileNumber").value;
+        amount = parseFloat(document.getElementById("mobileAmount").value);
+      }
+
+      if (!destination || isNaN(amount) || amount < 1) {
+        message.textContent = "Please enter valid details and amount.";
+        return;
+      }
+
+      fetch("http://localhost:5000/withdraw", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ method, destination, amount })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert("Withdrawal submitted successfully!");
+          message.style.color = "green";
+          message.textContent = "Withdrawal successful.";
+          document.getElementById("method").value = "";
+          Object.values(sections).forEach(sec => {
+            sec.style.display = "none";
+            sec.querySelectorAll("input").forEach(i => i.value = "");
+          });
+        } else {
+          message.style.color = "#dc3545";
+          message.textContent = data.message || "Withdrawal failed.";
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        message.textContent = "Error contacting server.";
+      });
+    }
+  </script>
+</body>
+</html>
