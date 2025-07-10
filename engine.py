@@ -781,7 +781,7 @@ def admin_login():
         # ✅ Only allow simulated admin login
         if username == 'elvisking@#890' and password == 'Jojo03@1@1':
             session['user_id'] = -1  # Use a fake ID not in the database
-            session['username'] = 'admin'
+            session['username'] = 'elvisking@#890'
             session['is_admin'] = True
             return jsonify({'success': True, 'message': 'Simulated admin login successful'})
         
