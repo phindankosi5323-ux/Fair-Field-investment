@@ -150,16 +150,22 @@ def admin_required(f):
     from functools import wraps
     @wraps(f)
     def decorated(*args, **kwargs):
-        if 'user_id' not in session:
+        if 'user_id' not in session or 'is_admin' not in session:
             return redirect(url_for('login'))
+
+        # Handle simulated admin
+        if session.get('username') == 'admin' and session.get('is_admin') is True:
+            return f(*args, **kwargs)
+
         conn = get_db()
         user = conn.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
         conn.close()
+
         if not user or user['is_admin'] != 1:
             return "Unauthorized", 403
         return f(*args, **kwargs)
     return decorated
-
+    
 # --- USER LOGIN REQUIRED DECORATOR ---
 def login_required(f):
     from functools import wraps
