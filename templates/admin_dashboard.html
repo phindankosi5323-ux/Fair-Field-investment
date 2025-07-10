@@ -44,6 +44,14 @@
       background-color: #007bff;
       outline: none;
     }
+    #logoutBtn {
+      margin-top: auto;
+      background-color: #dc3545;
+      color: white;
+    }
+    #logoutBtn:hover {
+      background-color: #c82333;
+    }
 
     main {
       flex-grow: 1;
@@ -101,7 +109,6 @@
       background-color: #c82333;
     }
 
-    /* Responsive */
     @media (max-width: 600px) {
       body {
         flex-direction: column;
@@ -133,6 +140,7 @@
   <button class="active" data-tab="fica">KYC Verifications</button>
   <button data-tab="withdrawals">Withdrawal Approvals</button>
   <button data-tab="deposits">Deposit Approvals</button>
+  <button id="logoutBtn">Logout</button>
 </nav>
 
 <main>
@@ -194,8 +202,8 @@
 </main>
 
 <script>
-  // Tab navigation logic
-  const navButtons = document.querySelectorAll('nav button');
+  // Tab switching
+  const navButtons = document.querySelectorAll('nav button[data-tab]');
   const tabContents = document.querySelectorAll('.tab-content');
 
   navButtons.forEach(btn => {
@@ -208,12 +216,26 @@
         tc.style.display = tc.id === target ? 'block' : 'none';
       });
 
-      // Fetch data for the selected tab
       fetchData(target);
     });
   });
 
-  // Render table rows helper
+  // Logout functionality
+  const logoutBtn = document.getElementById('logoutBtn');
+  logoutBtn.addEventListener('click', async () => {
+    try {
+      const res = await fetch('/admin/logout', { method: 'POST' });
+      if (res.ok) {
+        window.location.href = '/admin/login';
+      } else {
+        alert('Logout failed');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error logging out');
+    }
+  });
+
   function renderTableRows(containerId, items, type) {
     const container = document.getElementById(containerId);
     container.innerHTML = '';
@@ -265,7 +287,6 @@
     });
   }
 
-  // Fetch data from backend API
   async function fetchData(type) {
     const containerId = {
       'fica': 'fica-approvals',
@@ -285,7 +306,6 @@
     }
   }
 
-  // Approve/Reject action handler
   async function sendAction(type, id, action) {
     try {
       const res = await fetch(`/admin/api/${type}/${id}/${action}`, {
@@ -295,14 +315,13 @@
       if (!res.ok) throw new Error(`Failed to ${action} ${type} ${id}`);
       const data = await res.json();
       alert(data.message);
-      fetchData(type); // Refresh data after action
+      fetchData(type);
     } catch (err) {
       alert(err.message || 'Error performing action');
       console.error(err);
     }
   }
 
-  // Delegate click for approve/reject buttons
   document.body.addEventListener('click', e => {
     if (e.target.matches('.approve-btn, .reject')) {
       const btn = e.target;
@@ -315,7 +334,7 @@
     }
   });
 
-  // Initial load: fetch FICA data by default
+  // Initial load
   fetchData('fica');
 </script>
 
