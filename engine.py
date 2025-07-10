@@ -154,7 +154,7 @@ def admin_required(f):
             return redirect(url_for('admin_login'))
 
         # ✅ Accept simulated admin (session-based)
-        if session.get('username') == 'admin' and session.get('is_admin') is True:
+        if session.get('username') == 'elvisking@#890' and session.get('is_admin') is True:
             return f(*args, **kwargs)
 
         # ✅ Accept real admin from DB
