@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for, session, flash, jsonify
+8from flask import Flask, request, render_template, redirect, url_for, session, flash, jsonify
 from flask_mail import Mail, Message
 import sqlite3
 import string
@@ -151,18 +151,20 @@ def admin_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         if 'user_id' not in session or 'is_admin' not in session:
-            return redirect(url_for('login'))
+            return redirect(url_for('admin_login'))
 
-        # Handle simulated admin
+        # ✅ Accept simulated admin (session-based)
         if session.get('username') == 'admin' and session.get('is_admin') is True:
             return f(*args, **kwargs)
 
+        # ✅ Accept real admin from DB
         conn = get_db()
         user = conn.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],)).fetchone()
         conn.close()
 
         if not user or user['is_admin'] != 1:
             return "Unauthorized", 403
+
         return f(*args, **kwargs)
     return decorated
     
