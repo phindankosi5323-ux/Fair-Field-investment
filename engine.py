@@ -1,4 +1,4 @@
-8from flask import Flask, request, render_template, redirect, url_for, session, flash, jsonify
+from flask import Flask, request, render_template, redirect, url_for, session, flash, jsonify
 from flask_mail import Mail, Message
 import sqlite3
 import string
