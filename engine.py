@@ -789,11 +789,10 @@ def admin_login():
 
     return render_template('admin_login.html')
 
-@app.route('/admin/logout')
-@admin_required
+@app.route('/admin/logout', methods=['POST'])
 def admin_logout():
     session.clear()
-    return redirect(url_for('admin_login'))
+    return jsonify({'success': True})
 
 @app.route('/admin/dashboard')
 @admin_required
