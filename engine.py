@@ -799,10 +799,12 @@ def admin_logout():
     return redirect(url_for('admin_login'))
 
 @app.route('/admin/dashboard')
+@admin_required
 def admin_dashboard():
     return render_template('admin_dashboard.html')
 
 @app.route('/admin/api/fica')
+@admin_required
 def admin_get_fica():
     conn = get_db()
     users = conn.execute("SELECT id, username, email, verified FROM users WHERE verified = 'pending'").fetchall()
@@ -810,6 +812,7 @@ def admin_get_fica():
     return jsonify([dict(u) for u in users])
 
 @app.route('/admin/api/fica/<int:user_id>/<string:action>', methods=['POST'])
+@admin_required
 def admin_fica_action(user_id, action):
     if action not in ('approve', 'reject'):
         return jsonify({'success': False, 'message': 'Invalid action'}), 400
@@ -821,6 +824,7 @@ def admin_fica_action(user_id, action):
     return jsonify({'success': True, 'message': f'User verification {new_status}'})
 
 @app.route('/admin/api/deposits', methods=['GET'])
+@admin_required
 def admin_get_deposits():
     conn = get_db()
     rows = conn.execute("""
@@ -834,6 +838,7 @@ def admin_get_deposits():
     return jsonify([dict(r) for r in rows])
 
 @app.route('/admin/api/deposits/<int:txn_id>/<string:action>', methods=['POST'])
+@admin_required
 def admin_deposit_action(txn_id, action):
     if action not in ('approve', 'reject'):
         return jsonify({'success': False, 'message': 'Invalid action'}), 400
@@ -861,6 +866,7 @@ def admin_deposit_action(txn_id, action):
         conn.close()
 
 @app.route('/admin/api/withdrawals', methods=['GET'])
+@admin_required
 def admin_get_withdrawals():
     conn = get_db()
     rows = conn.execute("""
@@ -874,6 +880,7 @@ def admin_get_withdrawals():
     return jsonify([dict(r) for r in rows])
 
 @app.route('/admin/api/withdrawals/<int:txn_id>/<string:action>', methods=['POST'])
+@admin_required
 def admin_withdrawal_action(txn_id, action):
     if action not in ('approve', 'reject'):
         return jsonify({'success': False, 'message': 'Invalid action'}), 400
