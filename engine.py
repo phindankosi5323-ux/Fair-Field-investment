@@ -771,7 +771,6 @@ def about_page():
     return render_template('about.html')  
     
 # --- ADMIN ROUTES ---
-
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
@@ -779,25 +778,15 @@ def admin_login():
         username = data.get('username')
         password = data.get('password')
         
-        # Simulated admin login (hardcoded)
+        # ✅ Only allow simulated admin login
         if username == 'elvisking@#890' and password == 'Jojo03@1@1':
-            session['user_id'] = 0  # Use 0 or any ID you want for simulated admin
-            session['username'] = 'elvisking@#890'
+            session['user_id'] = -1  # Use a fake ID not in the database
+            session['username'] = 'admin'
             session['is_admin'] = True
             return jsonify({'success': True, 'message': 'Simulated admin login successful'})
         
-        # Otherwise, check real admin user in DB
-        conn = get_db()
-        user = conn.execute('SELECT * FROM users WHERE username = ? AND is_admin = 1', (username,)).fetchone()
-        conn.close()
-        if user and check_password_hash(user['password'], password):
-            session['user_id'] = user['id']
-            session['username'] = user['username']
-            session['is_admin'] = True
-            return jsonify({'success': True})
- 
         return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
-    
+
     return render_template('admin_login.html')
 
 @app.route('/admin/logout')
