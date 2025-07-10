@@ -780,7 +780,7 @@ def admin_login():
         # Simulated admin login (hardcoded)
         if username == 'elvisking@#890' and password == 'Jojo03@1@1':
             session['user_id'] = 0  # Use 0 or any ID you want for simulated admin
-            session['username'] = 'admin'
+            session['username'] = 'elvisking@#890'
             session['is_admin'] = True
             return jsonify({'success': True, 'message': 'Simulated admin login successful'})
         
